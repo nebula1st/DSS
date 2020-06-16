@@ -1,0 +1,301 @@
+#: import sm kivy.uix.screenmanager
+#: import Window kivy.core.window.Window
+#: import dt datetime
+
+
+
+<FlatButton@ButtonBehavior+Label>:
+    text: 'default'
+
+<DSSWindow>:
+    id: main_win
+    orientation: 'vertical'
+    canvas.before:
+        Color:
+            rgba: (1,1,1,1)
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    
+    BoxLayout:
+        id: top_nav
+        size_hint_y: None
+        height: 30
+        canvas.before:
+            Color:
+                rgba: (.06, .45, .45,1)
+            Rectangle:
+                size: self.size
+                pos: self.pos
+        
+        FlatButton:
+            id: file_trigger
+            text: 'File'
+            on_release: file_dropdown.open(self)
+            size_hint: (.1,None)
+            height: 30
+
+            Widget:
+                on_parent: file_dropdown.dismiss()
+            
+                DropDown:
+                    id: file_dropdown
+                    Button:
+                        id: close
+                        text: 'Exit'
+                        size_hint_y: None
+                        height: 30
+                        on_release: Window.close()
+        Label:
+            text: 'DSS Dashboard'
+            bold: True
+            size_hint: (.9,None)
+            height: 30
+    BoxLayout:
+        id: content_nav
+        
+        BoxLayout:
+            id: nav_tabs
+            size_hint_x: .2
+            orientation: 'vertical'
+            spacing: 3
+            canvas.before:
+                Color:
+                    rgba: (.06, .52, .52,1)
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+
+            ToggleButton:
+                id: karyawan_toggle
+                text: 'Manage Karyawan'
+                size_hint_y: .1
+                background_color: (.06, .47, .47, 1)
+                background_normal: ''
+                group: 'admin_navs'
+                on_state: root.change_screen(self)
+            ToggleButton:
+                id: kriteria_toggle
+                text: 'Manage Kriteria'
+                size_hint_y: .1
+                background_color: (.06, .47, .47, 1)
+                background_normal: ''
+                group: 'admin_navs'
+                on_state: root.change_screen(self)
+            ToggleButton:
+                id: subkriteria_toggle
+                text: 'Manage SubKriteria'
+                size_hint_y: .1
+                background_color: (.06, .47, .47, 1)
+                background_normal: ''
+                group: 'admin_navs'
+                on_state: root.change_screen(self)
+            ToggleButton:
+                id: nilai_toggle
+                text: 'Manage Nilai'
+                size_hint_y: .1
+                background_color: (.06, .47, .47, 1)
+                background_normal: ''
+                group: 'admin_navs'
+                on_state: root.change_screen(self)
+            ToggleButton:
+                id: saw_toggle
+                text: 'Hitung SAW'
+                size_hint_y: .1
+                background_color: (.06, .47, .47, 1)
+                background_normal: ''
+                group: 'admin_navs'
+                on_state: root.change_screen(self)
+            ToggleButton:
+                id: topsis_toggle
+                text: 'Hitung Topsis'
+                size_hint_y: .1
+                background_color: (.06, .47, .47, 1)
+                background_normal: ''
+                group: 'admin_navs'
+                on_state: root.change_screen(self)
+            Label:
+                id: sp
+                text: ''
+                size_hint_y: .7
+        BoxLayout:
+            id: all_content
+            size_hint_x: .8
+            padding: (20,10)
+            ScreenManager:
+                id: scrn_mngr
+                transition: sm.NoTransition()
+                Screen:
+                    id: welcome_content
+                    name: 'welcome_content'
+                    Image:
+                        source: 'admin/kivy_logo.png'    
+                Screen:
+                    id: karyawan_content
+                    name: 'karyawan_content'
+                    BoxLayout:
+                        orientation: 'vertical'
+                        spacing: 10
+                        BoxLayout:
+                            id: karyawan_contents
+                        BoxLayout:
+                            id: ops_fields_k
+                            spacing: 10
+                            size_hint_y: None
+                            height: 35
+                        BoxLayout:
+                            id: ops_btns_k
+                            spacing: 10
+                            size_hint_y: None
+                            height: 45
+                            Button:
+                                id: crud_add_k
+                                text: 'Add Karyawan'
+                                on_release: root.add_karyawan_fields()
+                            Button:
+                                id: crud_update_k
+                                text: 'Update Karyawan'
+                                on_release: root.update_karyawan_fields()
+                            Button:
+                                id: crud_remove_k
+                                text: 'Remove Karyawan'
+                                on_release: root.remove_karyawan_fields()
+                Screen:
+                    id: kriteria_content
+                    name: 'kriteria_content'
+                    BoxLayout:
+                        orientation: 'vertical'
+                        spacing: 10
+                        BoxLayout:
+                            id: kriteria_contents
+                        BoxLayout:
+                            id: ops_fields_krit
+                            spacing: 10
+                            size_hint_y: None
+                            height: 35
+                        BoxLayout:
+                            id: ops_btns_krit
+                            spacing: 10
+                            size_hint_y: None
+                            height: 45
+                            Button:
+                                id: crud_add_krit
+                                text: 'Add Kriteria'
+                                on_release: root.add_kriteria_fields()
+                            Button:
+                                id: crud_update_krit
+                                text: 'Update Kriteria'
+                                on_release: root.update_kriteria_fields()
+                            Button:
+                                id: crud_remove_krit
+                                text: 'Remove Kriteria'
+                                on_release: root.remove_kriteria_fields()
+                Screen:
+                    id: subkriteria_content
+                    name: 'subkriteria_content'
+                    BoxLayout:
+                        orientation: 'vertical'
+                        spacing: 10
+                        BoxLayout:
+                            id: subkriteria_contents
+                        BoxLayout:
+                            id: ops_fields_sk
+                            spacing: 10
+                            size_hint_y: None
+                            height: 35
+                        BoxLayout:
+                            id: ops_btns_sk
+                            spacing: 10
+                            size_hint_y: None
+                            height: 45
+                            Button:
+                                id: crud_add_sk
+                                text: 'Add SubKriteria'
+                                on_release: root.add_user_fields()
+                            Button:
+                                id: crud_update_sk
+                                text: 'Update SubKriteria'
+                                on_release: root.update_user_fields()
+                            Button:
+                                id: crud_remove_sk
+                                text: 'Remove SubKrtieria'
+                                on_release: root.remove_user_fields()
+                Screen:
+                    id: nilai_content
+                    name: 'nilai_content'
+                    BoxLayout:
+                        orientation: 'vertical'
+                        spacing: 10
+                        BoxLayout:
+                            id: nilai_contents
+                        BoxLayout:
+                            id: ops_fields_n
+                            spacing: 10
+                            size_hint_y: None
+                            height: 35
+                        BoxLayout:
+                            id: ops_btns_n
+                            spacing: 10
+                            size_hint_y: None
+                            height: 45
+                            Spinner:
+                                id: list_tahun_n
+                                text: 'Tahun'
+                                on_text: self.text
+                            Spinner:
+                                id: list_bulan_n
+                                text: 'Bulan'
+                                on_text: self.text
+                            Button:
+                                id: show_n
+                                text: 'Show Nilai'
+                                on_release: root.on_release_nilai(list_bulan_n.text, list_tahun_n.text)
+                            Button:
+                                id: crud_add_n
+                                text: 'Add Nilai'
+                                on_release: root.add_user_fields()
+                            Button:
+                                id: crud_update_n
+                                text: 'Update Nilai'
+                                on_release: root.update_user_fields()
+                            Button:
+                                id: crud_remove_n
+                                text: 'Remove Nilai'
+                                on_release: root.remove_user_fields()
+                Screen:
+                    id: saw_content
+                    name: 'saw_content'
+                    BoxLayout:
+                        orientation: 'vertical'
+                        spacing: 10
+                        BoxLayout:
+                            id: saw_contents
+                        BoxLayout:
+                            id: ops_fields_s
+                            spacing: 10
+                            size_hint_y: None
+                            height: 35
+                        BoxLayout:
+                            id: ops_btns_s
+                            spacing: 10
+                            size_hint_y: None
+                            height: 45
+                            Spinner:
+                                id: list_tahun_s
+                                text: 'Tahun'
+                                on_text: self.text
+                            Spinner:
+                                id: list_bulan_s
+                                text: 'Bulan'
+                                on_text: self.text
+                            Button:
+                                id: show_s
+                                text: 'Show SAW'
+                                on_release: root.on_release_saw(list_bulan_s.text, list_tahun_s.text)
+                            Button:
+                                id: show_hitung_s
+                                text: 'Hitung SAW'
+                                on_release: root.on_release_hitung_saw(list_bulan_s.text, list_tahun_s.text)
+                Screen:
+                    id: topsis_content
+                    name: 'topsis_content'
