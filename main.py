@@ -14,7 +14,7 @@ class MainWindow(BoxLayout):
 
         self.ids.scrn_log.add_widget(self.login_widget)
         self.ids.scrn_dss.add_widget(self.DSS_widget)
-
+        
 class MainApp(App):
     def build(self):
 

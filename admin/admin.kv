@@ -37,9 +37,14 @@
 
             Widget:
                 on_parent: file_dropdown.dismiss()
-            
                 DropDown:
                     id: file_dropdown
+                    Button:
+                        id: close
+                        text: 'Logout'
+                        size_hint_y: None
+                        height: 30
+                        on_release: root.logout()
                     Button:
                         id: close
                         text: 'Exit'
@@ -150,15 +155,15 @@
                             height: 45
                             Button:
                                 id: crud_add_k
-                                text: 'Add Karyawan'
+                                text: 'Add'
                                 on_release: root.add_karyawan_fields()
                             Button:
                                 id: crud_update_k
-                                text: 'Update Karyawan'
+                                text: 'Update'
                                 on_release: root.update_karyawan_fields()
                             Button:
                                 id: crud_remove_k
-                                text: 'Remove Karyawan'
+                                text: 'Remove'
                                 on_release: root.remove_karyawan_fields()
                 Screen:
                     id: kriteria_content
@@ -180,15 +185,15 @@
                             height: 45
                             Button:
                                 id: crud_add_krit
-                                text: 'Add Kriteria'
+                                text: 'Add'
                                 on_release: root.add_kriteria_fields()
                             Button:
                                 id: crud_update_krit
-                                text: 'Update Kriteria'
+                                text: 'Update'
                                 on_release: root.update_kriteria_fields()
                             Button:
                                 id: crud_remove_krit
-                                text: 'Remove Kriteria'
+                                text: 'Remove'
                                 on_release: root.remove_kriteria_fields()
                 Screen:
                     id: subkriteria_content
@@ -210,16 +215,16 @@
                             height: 45
                             Button:
                                 id: crud_add_sk
-                                text: 'Add SubKriteria'
-                                on_release: root.add_user_fields()
+                                text: 'Add'
+                                on_release: root.add_sk_fields()
                             Button:
                                 id: crud_update_sk
-                                text: 'Update SubKriteria'
-                                on_release: root.update_user_fields()
+                                text: 'Update'
+                                on_release: root.update_sk_fields()
                             Button:
                                 id: crud_remove_sk
-                                text: 'Remove SubKrtieria'
-                                on_release: root.remove_user_fields()
+                                text: 'Remove'
+                                on_release: root.remove_sk_fields()
                 Screen:
                     id: nilai_content
                     name: 'nilai_content'
@@ -233,6 +238,14 @@
                             spacing: 10
                             size_hint_y: None
                             height: 35
+                            Spinner:
+                                id: list_krit_n
+                                text: 'Kode K'
+                                on_text: root.on_kode_krit_select(self.text)
+                            Spinner:
+                                id: list_subkrit_n
+                                text: 'Kode SK'
+                                on_text: self.text
                         BoxLayout:
                             id: ops_btns_n
                             spacing: 10
@@ -252,16 +265,16 @@
                                 on_release: root.on_release_nilai(list_bulan_n.text, list_tahun_n.text)
                             Button:
                                 id: crud_add_n
-                                text: 'Add Nilai'
-                                on_release: root.add_user_fields()
+                                text: 'Add'
+                                on_release: root.add_nilai_fields()
                             Button:
                                 id: crud_update_n
-                                text: 'Update Nilai'
-                                on_release: root.update_user_fields()
+                                text: 'Update'
+                                on_release: root.update_nilai_fields()
                             Button:
                                 id: crud_remove_n
-                                text: 'Remove Nilai'
-                                on_release: root.remove_user_fields()
+                                text: 'Remove'
+                                on_release: root.remove_nilai_fields()
                 Screen:
                     id: saw_content
                     name: 'saw_content'

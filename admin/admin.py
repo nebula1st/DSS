@@ -33,7 +33,19 @@ class DSSWindow(BoxLayout):
         #notif
         self.notify = Notify()
 
+        #crud nilai
+        self.ids.list_krit_n.values = []
+        conn = ConnectDB().Connect()
+        cursor = conn.cursor()
+        find_k = ("SELECT * FROM Kriteria")
+        cursor.execute(find_k)
+        results = cursor.fetchall()
+        for i in results:
+            self.ids.list_krit_n.values.append(str(i[0]))
+
         #dates & set spinner nilai & saw values
+        self.today = dt.today().date()
+        
         year = int(dt.today().date().strftime("%Y"))
         self.ids.list_tahun_n.values = []
         self.ids.list_bulan_n.values = []
@@ -64,6 +76,10 @@ class DSSWindow(BoxLayout):
         subkriterias_table = DataTable(table=subkrtierias)
         subkriteria_scrn.add_widget(subkriterias_table)
         
+    def logout(self):
+        self.parent.parent.current = 'scrn_log'
+        self.ids.file_dropdown.dismiss()
+
     def add_karyawan_fields(self):
             target = self.ids.ops_fields_k
             target.clear_widgets()
@@ -150,6 +166,125 @@ class DSSWindow(BoxLayout):
             crud_kode = TextInput(hint_text='Kode Kriteria',multiline=False)
             crud_submit = Button(text='Delete',size_hint_x=None,width=100,on_release=lambda x: self.delete_kriteria(crud_kode.text))
             target.add_widget(crud_kode)
+            target.add_widget(crud_submit)
+
+    def add_sk_fields(self):
+            target = self.ids.ops_fields_sk
+            target.clear_widgets()
+            crud_kode_kriteria = Spinner(text='Kode K')
+            crud_kode_kriteria.values = []
+            conn = ConnectDB().Connect()
+            cursor = conn.cursor()
+            find_k = ("SELECT * FROM Kriteria")
+            cursor.execute(find_k)
+            results = cursor.fetchall()
+            for i in results:
+                crud_kode_kriteria.values.append(str(i[0]))
+            crud_kode = TextInput(hint_text='Kode SubKriteria',multiline=False)
+            crud_nama = TextInput(hint_text='Nama',multiline=False)
+            crud_bobot = TextInput(hint_text='Bobot',multiline=False)
+            crud_keterangan = TextInput(hint_text='Keterangan',multiline=False)
+            crud_submit = Button(text='Add',size_hint_x=None,width=100,on_release=lambda x: self.add_sk(crud_kode.text, crud_kode_kriteria.text, crud_nama.text, crud_bobot.text, crud_keterangan.text))
+
+            target.add_widget(crud_kode)
+            target.add_widget(crud_kode_kriteria)
+            target.add_widget(crud_nama)
+            target.add_widget(crud_bobot)
+            target.add_widget(crud_keterangan)
+            target.add_widget(crud_submit)
+
+    def update_sk_fields(self):
+            target = self.ids.ops_fields_sk
+            target.clear_widgets()
+            crud_kode_kriteria = Spinner(text='Kode K')
+            crud_kode_kriteria.values = []
+            conn = ConnectDB().Connect()
+            cursor = conn.cursor()
+            find_k = ("SELECT * FROM Kriteria")
+            cursor.execute(find_k)
+            results = cursor.fetchall()
+            for i in results:
+                crud_kode_kriteria.values.append(str(i[0]))
+            crud_kode = TextInput(hint_text='Kode SubKriteria',multiline=False)
+            crud_nama = TextInput(hint_text='Nama',multiline=False)
+            crud_bobot = TextInput(hint_text='Bobot',multiline=False)
+            crud_keterangan = TextInput(hint_text='Keterangan',multiline=False)
+            crud_submit = Button(text='Update',size_hint_x=None,width=100,on_release=lambda x: self.update_sk(crud_kode.text, crud_kode_kriteria.text, crud_nama.text, crud_bobot.text, crud_keterangan.text))
+
+            target.add_widget(crud_kode)
+            target.add_widget(crud_kode_kriteria)
+            target.add_widget(crud_nama)
+            target.add_widget(crud_bobot)
+            target.add_widget(crud_keterangan)
+            target.add_widget(crud_submit)
+
+    def remove_sk_fields(self):
+            target = self.ids.ops_fields_sk
+            target.clear_widgets()
+            crud_kode = TextInput(hint_text='Kode SubKriteria',multiline=False)
+            crud_submit = Button(text='Delete',size_hint_x=None,width=100,on_release=lambda x: self.delete_sk(crud_kode.text))
+            target.add_widget(crud_kode)
+            target.add_widget(crud_submit)
+
+
+    def on_kode_krit_select(self, kode_krit):
+            self.ids.list_subkrit_n.values = []
+            target = self.ids.ops_fields_n
+            conn = ConnectDB().Connect()
+            cursor = conn.cursor()
+            find_sk = ("SELECT * FROM subKriteria WHERE kode_krit_fk = %s")
+            cursor.execute(find_sk, [(kode_krit)])
+            results = cursor.fetchall()
+            for i in results:
+                self.ids.list_subkrit_n.values.append(str(i[0]))   
+
+    def add_nilai_fields(self):
+            target = self.ids.ops_fields_n
+            target.clear_widgets()
+            crud_id = TextInput(hint_text='ID Karyawan',multiline=False)
+            crud_tgl = self.today
+            crud_nilai = TextInput(hint_text='Nilai',multiline=False)
+            crud_submit = Button(text='Add',size_hint_x=None,width=100,on_release=lambda x: self.add_nilai(crud_id.text, crud_tgl, self.ids.list_krit_n.text, self.ids.list_subkrit_n.text, crud_nilai.text))
+
+            target.add_widget(crud_id)
+            target.add_widget(self.ids.list_krit_n)
+            target.add_widget(self.ids.list_subkrit_n)
+            target.add_widget(crud_nilai)
+            target.add_widget(crud_submit)
+
+    def update_nilai_fields(self):
+            target = self.ids.ops_fields_n
+            target.clear_widgets()
+            crud_kode_kriteria = Spinner(text='Kode K')
+            crud_kode_kriteria.values = []
+            conn = ConnectDB().Connect()
+            cursor = conn.cursor()
+            find_k = ("SELECT * FROM Kriteria")
+            cursor.execute(find_k)
+            results = cursor.fetchall()
+            for i in results:
+                crud_kode_kriteria.values.append(str(i[0]))
+            crud_kode = TextInput(hint_text='Kode SubKriteria',multiline=False)
+            crud_nama = TextInput(hint_text='Nama',multiline=False)
+            crud_bobot = TextInput(hint_text='Bobot',multiline=False)
+            crud_keterangan = TextInput(hint_text='Keterangan',multiline=False)
+            crud_submit = Button(text='Update',size_hint_x=None,width=100,on_release=lambda x: self.update_sk(crud_kode.text, crud_kode_kriteria.text, crud_nama.text, crud_bobot.text, crud_keterangan.text))
+
+            target.add_widget(crud_kode)
+            target.add_widget(crud_kode_kriteria)
+            target.add_widget(crud_nama)
+            target.add_widget(crud_bobot)
+            target.add_widget(crud_keterangan)
+            target.add_widget(crud_submit)
+
+    def remove_nilai_fields(self):
+            target = self.ids.ops_fields_n
+            target.clear_widgets()
+            crud_id = TextInput(hint_text='ID Karyawan',multiline=False)
+            crud_submit = Button(text='Delete',size_hint_x=None,width=100,on_release=lambda x: self.delete_nilai(crud_id.text, self.ids.list_krit_n.text, self.ids.list_subkrit_n.text))
+            target.add_widget(crud_id)
+            target.add_widget(self.ids.list_krit_n)
+            target.add_widget(self.ids.list_subkrit_n)
             target.add_widget(crud_submit)
         
     def add_user(self, id, nama, divisi, jk, ultah, alamat, telp):
@@ -251,7 +386,7 @@ class DSSWindow(BoxLayout):
                 content.add_widget(userstable)
     
     def add_kriteria(self, kode, nama, bobot, keterangan):
-            if id == '' or nama == '' or bobot == '':
+            if kode == '' or nama == '' or bobot == '':
                 self.notify.add_widget(Label(text='[color=#FF0000][b]All Fields Required[/b][/color]',markup=True))
                 self.notify.open()
                 Clock.schedule_once(self.killswitch,2)
@@ -339,7 +474,7 @@ class DSSWindow(BoxLayout):
 
     def delete_kriteria(self, kode):
             if kode == '':
-                self.notify.add_widget(Label(text='[color=#FF0000][b]All Fields Required[/b][/color]',markup=True))
+                self.notify.add_widget(Label(text='[color=#FF0000][b]Kode Kriteria Fields Required[/b][/color]',markup=True))
                 self.notify.open()
                 Clock.schedule_once(self.killswitch,2)
             else:
@@ -363,6 +498,186 @@ class DSSWindow(BoxLayout):
                 content.clear_widgets()
 
                 users = self.get_kriterias()
+                userstable = DataTable(table=users)
+                content.add_widget(userstable)
+
+    def add_sk(self, kode, kode_kriteria, nama, bobot, keterangan):
+            if kode == '' or kode_kriteria == 'Kode K' or nama == '' or bobot == '':
+                self.notify.add_widget(Label(text='[color=#FF0000][b]All Fields Required[/b][/color]',markup=True))
+                self.notify.open()
+                Clock.schedule_once(self.killswitch,2)
+            else:
+                conn = ConnectDB().Connect()
+                cursor = conn.cursor()
+                find_k = ("SELECT * FROM SubKriteria WHERE kode_sub = %s")
+                cursor.execute(find_k, [(kode)])
+                results = cursor.fetchall()
+                if results:
+                    self.notify.add_widget(Label(text='[color=#FF0000][b]SubKriteria Sudah Ada![/b][/color]',markup=True))
+                    self.notify.open()
+                    Clock.schedule_once(self.killswitch,2)     
+                else:
+                    show_sk = ("SELECT * FROM SubKriteria WHERE kode_krit_fk = %s")
+                    cursor.execute(show_sk, [(kode_kriteria)])
+                    results = cursor.fetchall()
+                    bobott=0
+                    for i in results:
+                        bobott = bobott + i[3]
+                    if (bobott + float(bobot)) > 1:
+                        self.notify.add_widget(Label(text='[color=#FF0000][b]Bobot SubKriteria Melebihi 100%![/b][/color]',markup=True))
+                        self.notify.open()
+                        Clock.schedule_once(self.killswitch,2)  
+                    else:
+                        insert_subkriteria = ("INSERT INTO subkriteria VALUES ( %s, %s, %s, %s, %s)")
+                        cursor.execute(insert_subkriteria,[(kode), (kode_kriteria), (nama), (bobot), (keterangan)])
+                        conn.commit()
+                        self.notify.add_widget(Label(text='[color=#FF0000][b]Data Sukses Dimasukkan![/b][/color]',markup=True))
+                        self.notify.open()
+                        Clock.schedule_once(self.killswitch,2)
+                content = self.ids.subkriteria_contents
+                content.clear_widgets()
+
+                users = self.get_subkriterias()
+                userstable = DataTable(table=users)
+                content.add_widget(userstable)
+    
+    def update_sk(self, kode, kode_kriteria, nama, bobot, keterangan):
+            if kode == '':
+                self.notify.add_widget(Label(text='[color=#FF0000][b]Kode SubKriteria Fields Required[/b][/color]',markup=True))
+                self.notify.open()
+                Clock.schedule_once(self.killswitch,2)
+            else:
+                conn = ConnectDB().Connect()
+                cursor = conn.cursor()
+                find_k = ("SELECT * FROM subkriteria WHERE kode_sub = %s")
+                cursor.execute(find_k, [(kode)])
+                results = cursor.fetchall()
+                if results:
+                    for i in results:
+                        if kode_kriteria == 'Kode K':
+                            kode_kriteria = i[1]
+                        if nama == '':
+                            nama = i[2]
+                        if bobot == '':
+                            bobot = i[3]
+                        if keterangan == '':
+                            keterangan = i[4]
+                        show_sk = ("SELECT * FROM SubKriteria WHERE kode_krit_fk = %s")
+                        cursor.execute(show_sk, [(kode_kriteria)])
+                        results = cursor.fetchall()
+                        bobott=0
+                        for j in results:
+                            bobott = bobott + j[3]
+                        if (bobott - i[3] + float(bobot)) > 1:
+                            self.notify.add_widget(Label(text='[color=#FF0000][b]Bobot SubKriteria Melebihi 100%![/b][/color]',markup=True))
+                            self.notify.open()
+                            Clock.schedule_once(self.killswitch,2)  
+                        else:
+                            update_kriteria = ("UPDATE subkriteria SET kode_krit_fk = %s, nama_sub = %s, bobot_sub = %s, keterangan_sub = %s WHERE kode_sub = %s")
+                            cursor.execute(update_kriteria,[(kode_kriteria), (nama), (bobot), (keterangan), (kode)])
+                            conn.commit()
+                            self.notify.add_widget(Label(text='[color=#FF0000][b]Data Sukses Diupdate![/b][/color]',markup=True))
+                            self.notify.open()
+                            Clock.schedule_once(self.killswitch,2)     
+                else:
+                    self.notify.add_widget(Label(text='[color=#FF0000][b]Data SubKriteria Tidak Ditemukan![/b][/color]',markup=True))
+                    self.notify.open()
+                    Clock.schedule_once(self.killswitch,2)
+                content = self.ids.subkriteria_contents
+                content.clear_widgets()
+
+                users = self.get_subkriterias()
+                userstable = DataTable(table=users)
+                content.add_widget(userstable)
+
+    def delete_sk(self, kode):
+            if kode == '':
+                self.notify.add_widget(Label(text='[color=#FF0000][b]Kode SubKriteria Fields Required[/b][/color]',markup=True))
+                self.notify.open()
+                Clock.schedule_once(self.killswitch,2)
+            else:
+                conn = ConnectDB().Connect()
+                cursor = conn.cursor()
+                find_sk = ("SELECT * FROM subkriteria WHERE kode_sub = %s")
+                cursor.execute(find_sk, [(kode)])
+                results = cursor.fetchall()
+                if results:
+                    delete_sk = ("DELETE FROM subkriteria WHERE kode_sub = %s")
+                    cursor.execute(delete_sk, [(kode)])
+                    conn.commit()
+                    self.notify.add_widget(Label(text='[color=#FF0000][b]Data SubKriteria Sukses Dihapus![/b][/color]',markup=True))
+                    self.notify.open()
+                    Clock.schedule_once(self.killswitch, 2) 
+                else:
+                    self.notify.add_widget(Label(text='[color=#FF0000][b]Data SubKriteria Tidak Ditemukan![/b][/color]',markup=True))
+                    self.notify.open()
+                    Clock.schedule_once(self.killswitch,2)
+                content = self.ids.subkriteria_contents
+                content.clear_widgets()
+
+                users = self.get_subkriterias()
+                userstable = DataTable(table=users)
+                content.add_widget(userstable)
+
+    def add_nilai(self, id, tgl, krit, subkrit, nilai):
+            bln = dt.today().date().strftime("%m")
+            thn = dt.today().date().strftime("%Y")
+            if id == '' or krit == 'Kode K' or subkrit == 'Kode SK' or nilai == '':
+                self.notify.add_widget(Label(text='[color=#FF0000][b]All Fields Required[/b][/color]',markup=True))
+                self.notify.open()
+                Clock.schedule_once(self.killswitch,2)
+            else:
+                conn = ConnectDB().Connect()
+                cursor = conn.cursor()
+                find_n = ("select * from penilaiankaryawan where IDKaryawan_nilai = %s AND month(Tanggal) = %s && YEAR(Tanggal) = %s AND kode_sub_nilai = %s AND kode_krit_nilai = %s")
+                cursor.execute(find_n, [(id), (bln), (thn), (subkrit), (krit)])
+                results = cursor.fetchall()
+                if results:
+                    self.notify.add_widget(Label(text='[color=#FF0000][b]Nilai Sudah Ada![/b][/color]',markup=True))
+                    self.notify.open()
+                    Clock.schedule_once(self.killswitch,2)     
+                else:
+                    insert_n = ("INSERT INTO penilaiankaryawan VALUES ( %s, %s, %s, %s, %s)")
+                    cursor.execute(insert_n,[(id), (tgl), (subkrit), (krit), (nilai)])
+                    conn.commit()
+                    self.notify.add_widget(Label(text='[color=#FF0000][b]Data Sukses Dimasukkan![/b][/color]',markup=True))
+                    self.notify.open()
+                    Clock.schedule_once(self.killswitch,2)
+                content = self.ids.nilai_contents
+                content.clear_widgets()
+
+                users = self.get_nilais(bln, thn)
+                userstable = DataTable(table=users)
+                content.add_widget(userstable)
+        
+    def delete_nilai(self, id, krit, subkrit):
+            bln = dt.today().date().strftime("%m")
+            thn = dt.today().date().strftime("%Y")
+            if id == '' or krit == 'Kode K' or subkrit == 'Kode SK':
+                self.notify.add_widget(Label(text='[color=#FF0000][b]All Fields Required[/b][/color]',markup=True))
+                self.notify.open()
+                Clock.schedule_once(self.killswitch,2)
+            else:
+                conn = ConnectDB().Connect()
+                cursor = conn.cursor()
+                find_n = ("select * from penilaiankaryawan where IDKaryawan_nilai = %s AND month(Tanggal) = %s && YEAR(Tanggal) = %s AND kode_sub_nilai = %s AND kode_krit_nilai = %s")
+                cursor.execute(find_n, [(id), (bln), (thn), (subkrit), (krit)])
+                results = cursor.fetchall()
+                if results:
+                    delete_n = ("delete from penilaiankaryawan where IDKaryawan_nilai = %s AND month(Tanggal) = %s && YEAR(Tanggal) = %s AND kode_sub_nilai = %s AND kode_krit_nilai = %s")
+                    cursor.execute(delete_n, [(id), (bln), (thn), (subkrit), (krit)])
+                    conn.commit()
+                    self.notify.add_widget(Label(text='[color=#FF0000][b]Data Nilai Sukses Dihapus![/b][/color]',markup=True))
+                    self.notify.open()
+                    Clock.schedule_once(self.killswitch, 2) 
+                else:
+                    self.notify.add_widget(Label(text='[color=#FF0000][b]Data Nilai Tidak Ditemukan![/b][/color]',markup=True))
+                    self.notify.open()
+                    Clock.schedule_once(self.killswitch,2)
+                content = self.ids.nilai_contents
+                content.clear_widgets()
+
+                users = self.get_nilais(bln, thn)
                 userstable = DataTable(table=users)
                 content.add_widget(userstable)
 
@@ -675,18 +990,23 @@ class DSSWindow(BoxLayout):
                                         test[i][k] = v
 
                 df = pd.DataFrame(test)
-
+                
                 #outputordereddict
-                for i, j in alter.items():
-                    idx = 0
-                    while idx < len(alter):
-                        if i == df.index[idx]:
-                            _saw['Alternatif'][idx]=j
-                            l=0
-                            for k in crit.keys():
-                                _saw['{0}'.format(k)][idx] = df.iloc[idx, l]
-                                l+=1
-                        idx+=1
+                if df.isnull().values.any():
+                    self.notify.add_widget(Label(text='[color=#FF0000][b]Nilai Masih Ada Yang Kosong![/b][/color]',markup=True))
+                    self.notify.open()
+                    Clock.schedule_once(self.killswitch,2)
+                else:
+                    for i, j in alter.items():
+                        idx = 0
+                        while idx < len(df.index):
+                            if i == df.index[idx]:
+                                _saw['Alternatif'][idx]=j
+                                l=0
+                                for k in crit.keys():
+                                    _saw['{0}'.format(k)][idx] = df.iloc[idx, l]
+                                    l+=1
+                            idx+=1
 
             return _saw
 
@@ -802,14 +1122,19 @@ class DSSWindow(BoxLayout):
                     V.append(round(v, 2))    
                  
                 #outputordereddict
-                for i, j in alter.items():
-                    idx = 0
-                    while idx < len(alter):
-                        if i == df.index[idx]:
-                            _saw['Alternatif'][idx] = j
-                            _saw['Vs'][idx] = V[idx]
-                            break
-                        idx+=1
+                if df.isnull().values.any():
+                    self.notify.add_widget(Label(text='[color=#FF0000][b]Nilai Masih Ada Yang Kosong![/b][/color]',markup=True))
+                    self.notify.open()
+                    Clock.schedule_once(self.killswitch,2)
+                else:
+                    for i, j in alter.items():
+                        idx = 0
+                        while idx < len(df.index):
+                            if i == df.index[idx]:
+                                _saw['Alternatif'][idx] = j
+                                _saw['Vs'][idx] = V[idx]
+                                break
+                            idx+=1
 
             return _saw
 

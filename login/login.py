@@ -26,10 +26,11 @@ class SigninWindow(BoxLayout):
                 if i[2]!='hr':
                     #label = self.ids.success
                     info.text = "[color=#FF0000]Anda tidak punya wewenang untuk membuka aplikasi ini[/color]"
-                    return (exit)
                 else:
-                    info.text = '[color=#00FF00]Logged In successfully!!![/color]'
                     self.parent.parent.current = 'scrn_dss'
+                    info.text = ""
+                    self.ids.username_field.text = ''
+                    self.ids.pwd_field.text = ''
         else:
             info.text = '[color=#FF0000]Invalid Username and/or Password[/color]'
                    
