@@ -341,6 +341,10 @@ class DSSWindow(BoxLayout):
                             divisi = i[2]
                         if jk == 'JK':
                             jk = i[3]
+                        if ultah == '':
+                            ultah = i[4]
+                        if alamat == '':
+                            alamat =i[5]
                         if telp == '':
                             telp = i[6]
                         update_karyawan = ("UPDATE karyawan SET Nama = %s, Divisi = %s, Jns_Kelamin = %s, Tgl_Lahir = %s, Alamat = %s, No_Telpon = %s WHERE IDKaryawan = %s")
@@ -489,12 +493,20 @@ class DSSWindow(BoxLayout):
                 cursor.execute(find_k, [(kode)])
                 results = cursor.fetchall()
                 if results:
-                    delete_k = ("DELETE FROM kriteria WHERE kode_krit = %s")
-                    cursor.execute(delete_k, [(kode)])
-                    conn.commit()
-                    self.notify.add_widget(Label(text='[color=#FF0000][b]Data Kriteria Sukses Dihapus![/b][/color]',markup=True))
-                    self.notify.open()
-                    Clock.schedule_once(self.killswitch, 2) 
+                    find_k = ("SELECT * FROM subkriteria WHERE kode_krit_fk = %s")
+                    cursor.execute(find_k, [(kode)])
+                    results = cursor.fetchall()
+                    if results:
+                        self.notify.add_widget(Label(text='[color=#FF0000][b]Data Kriteria Dipakai Untuk Data Lainnya![/b][/color]',markup=True))
+                        self.notify.open()
+                        Clock.schedule_once(self.killswitch, 2) 
+                    else:
+                        delete_k = ("DELETE FROM kriteria WHERE kode_krit = %s")
+                        cursor.execute(delete_k, [(kode)])
+                        conn.commit()
+                        self.notify.add_widget(Label(text='[color=#FF0000][b]Data Kriteria Sukses Dihapus![/b][/color]',markup=True))
+                        self.notify.open()
+                        Clock.schedule_once(self.killswitch, 2) 
                 else:
                     self.notify.add_widget(Label(text='[color=#FF0000][b]Data Kriteria Tidak Ditemukan![/b][/color]',markup=True))
                     self.notify.open()
@@ -607,12 +619,20 @@ class DSSWindow(BoxLayout):
                 cursor.execute(find_sk, [(kode)])
                 results = cursor.fetchall()
                 if results:
-                    delete_sk = ("DELETE FROM subkriteria WHERE kode_sub = %s")
-                    cursor.execute(delete_sk, [(kode)])
-                    conn.commit()
-                    self.notify.add_widget(Label(text='[color=#FF0000][b]Data SubKriteria Sukses Dihapus![/b][/color]',markup=True))
-                    self.notify.open()
-                    Clock.schedule_once(self.killswitch, 2) 
+                    find_k = ("SELECT * FROM penilaiankaryawan WHERE kode_sub_nilai = %s")
+                    cursor.execute(find_k, [(kode)])
+                    results = cursor.fetchall()
+                    if results:
+                        self.notify.add_widget(Label(text='[color=#FF0000][b]Data SubKriteria Dipakai Untuk Data Lainnya![/b][/color]',markup=True))
+                        self.notify.open()
+                        Clock.schedule_once(self.killswitch, 2) 
+                    else:
+                        delete_sk = ("DELETE FROM subkriteria WHERE kode_sub = %s")
+                        cursor.execute(delete_sk, [(kode)])
+                        conn.commit()
+                        self.notify.add_widget(Label(text='[color=#FF0000][b]Data SubKriteria Sukses Dihapus![/b][/color]',markup=True))
+                        self.notify.open()
+                        Clock.schedule_once(self.killswitch, 2) 
                 else:
                     self.notify.add_widget(Label(text='[color=#FF0000][b]Data SubKriteria Tidak Ditemukan![/b][/color]',markup=True))
                     self.notify.open()
@@ -951,8 +971,7 @@ class DSSWindow(BoxLayout):
 
             _saw = OrderedDict()
             _saw['Alternatif'] = {}
-            for i in crit.keys():
-                _saw['{0}'.format(i)] = {}
+
 
             find_saw = ("select * from showsaw where MONTh(tanggal) = %s && year(tanggal) = %s")
             cursor.execute(find_saw, [(bulan), (tahun)])
@@ -1018,13 +1037,15 @@ class DSSWindow(BoxLayout):
                     self.notify.open()
                     Clock.schedule_once(self.killswitch,2)
                 else:
+                    for i in df.columns:
+                        _saw['{0}'.format(i)] = {}
                     for i, j in alter.items():
                         idx = 0
                         while idx < len(df.index):
                             if i == df.index[idx]:
                                 _saw['Alternatif'][idx]=j
                                 l=0
-                                for k in crit.keys():
+                                for k in df.columns:
                                     _saw['{0}'.format(k)][idx] = df.iloc[idx, l]
                                     l+=1
                             idx+=1
@@ -1119,16 +1140,17 @@ class DSSWindow(BoxLayout):
                                         test[i][k] = v
 
                 df = pd.DataFrame(test)
-                
                 x, y = df.shape
                 
+                #normalisasi
                 for i in range(y):
                     V = []
                     for j in range(x):
                             v = round((df.iloc[j, i]/max(df.iloc[:, i])), 2)
                             V.append(v)
                     df.iloc[:, i]=V 
-                   
+
+                #hitung   
                 V = []
                 for i in range(x):
                     v = 0
@@ -1188,8 +1210,7 @@ class DSSWindow(BoxLayout):
 
             _top = OrderedDict()
             _top['Alternatif'] = {}
-            for i in crit.keys():
-                _top['{0}'.format(i)] = {}
+            
 
             find_top = ("select * from showsaw where MONTh(tanggal) = %s && year(tanggal) = %s")
             cursor.execute(find_top, [(bulan), (tahun)])
@@ -1246,7 +1267,6 @@ class DSSWindow(BoxLayout):
                                     if k == m:
                                         v = l[0]
                                         test[i][k] = v
-
                 df = pd.DataFrame(test)
                 
                 #outputordereddict
@@ -1255,13 +1275,15 @@ class DSSWindow(BoxLayout):
                     self.notify.open()
                     Clock.schedule_once(self.killswitch,2)
                 else:
+                    for i in df.columns:
+                        _top['{0}'.format(i)] = {}
                     for i, j in alter.items():
                         idx = 0
                         while idx < len(df.index):
                             if i == df.index[idx]:
                                 _top['Alternatif'][idx]=j
                                 l=0
-                                for k in crit.keys():
+                                for k in df.columns:
                                     _top['{0}'.format(k)][idx] = df.iloc[idx, l]
                                     l+=1
                             idx+=1
@@ -1356,9 +1378,7 @@ class DSSWindow(BoxLayout):
                                     if k == m:
                                         v = l[0]
                                         test[i][k] = v
-
                 df = pd.DataFrame(test)
-                
                 x, y = df.shape
                 
                 #normalisasi
@@ -1401,6 +1421,7 @@ class DSSWindow(BoxLayout):
                     v = (Sworst[i]/(Sbest[i]+Sworst[i]))
                     P.append(round(v, 4))
                 sp = sorted(P, reverse=True)
+
                 #outputordereddict
                 if df.isnull().values.any():
                     self.notify.add_widget(Label(text='[color=#FF0000][b]Nilai Masih Ada Yang Kosong![/b][/color]',markup=True))
