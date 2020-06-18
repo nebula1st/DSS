@@ -312,3 +312,34 @@
                 Screen:
                     id: topsis_content
                     name: 'topsis_content'
+                    BoxLayout:
+                        orientation: 'vertical'
+                        spacing: 10
+                        BoxLayout:
+                            id: topsis_contents
+                        BoxLayout:
+                            id: ops_fields_t
+                            spacing: 10
+                            size_hint_y: None
+                            height: 35
+                        BoxLayout:
+                            id: ops_btns_t
+                            spacing: 10
+                            size_hint_y: None
+                            height: 45
+                            Spinner:
+                                id: list_tahun_t
+                                text: 'Tahun'
+                                on_text: self.text
+                            Spinner:
+                                id: list_bulan_t
+                                text: 'Bulan'
+                                on_text: self.text
+                            Button:
+                                id: show_t
+                                text: 'Show TOPSIS'
+                                on_release: root.on_release_topsis(list_bulan_t.text, list_tahun_t.text)
+                            Button:
+                                id: show_hitung_t
+                                text: 'Hitung TOPSIS'
+                                on_release: root.on_release_hitung_topsis(list_bulan_t.text, list_tahun_t.text)

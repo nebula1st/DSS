@@ -14,6 +14,7 @@ from kivy.uix.label import Label
 from kivy.clock import Clock
 from kivy.uix.modalview import ModalView
 
+import math
 import pandas as pd
 import numpy as np
 from datetime import datetime as dt
@@ -51,12 +52,16 @@ class DSSWindow(BoxLayout):
         self.ids.list_bulan_n.values = []
         self.ids.list_tahun_s.values = []
         self.ids.list_bulan_s.values = []
+        self.ids.list_tahun_t.values = []
+        self.ids.list_bulan_t.values = []
         for i in range(year-4, year+1):
             self.ids.list_tahun_n.values.append(str(i))
             self.ids.list_tahun_s.values.append(str(i))
+            self.ids.list_tahun_t.values.append(str(i))
         for i in range(1, 13):
             self.ids.list_bulan_n.values.append(str(i))
             self.ids.list_bulan_s.values.append(str(i))
+            self.ids.list_bulan_t.values.append(str(i))
         
         #karyawan
         karyawan_scrn = self.ids.karyawan_contents
@@ -709,6 +714,22 @@ class DSSWindow(BoxLayout):
             norm_scrn.clear_widgets()
             norm_scrn.add_widget(norms_table)        
 
+    def on_release_topsis(self, bulan, tahun):       
+            #topsis
+            top_scrn = self.ids.topsis_contents
+            tops = self.get_topsiss(bulan, tahun)
+            tops_table = DataTable(table=tops)
+            top_scrn.clear_widgets()
+            top_scrn.add_widget(tops_table)
+    
+    def on_release_hitung_topsis(self, bulan, tahun):
+            #hitung topsis
+            norm_scrn = self.ids.topsis_contents
+            norms = self.get_hitungtopsiss(bulan, tahun)
+            norms_table = DataTable(table=norms)
+            norm_scrn.clear_widgets()
+            norm_scrn.add_widget(norms_table)  
+
     def get_karyawans(self):
             conn = ConnectDB().Connect()
             cursor = conn.cursor()
@@ -1014,9 +1035,7 @@ class DSSWindow(BoxLayout):
             _saw = OrderedDict()
             _saw['Alternatif'] = {}
             _saw['Vs'] = {}
-            #_saw['C1.2'] = {}
-            #_saw['C1.3'] = {}
-            #_saw['C1'] = {}
+            _saw['Rank'] = {}
 
             alter = {}
             crit = {}
@@ -1119,7 +1138,8 @@ class DSSWindow(BoxLayout):
                             if l == k: 
                                 v = v + (df.iloc[i, j]*m)
                                 j+=1
-                    V.append(round(v, 2))    
+                    V.append(round(v, 2))
+                sV = sorted(V, reverse=True)    
                  
                 #outputordereddict
                 if df.isnull().values.any():
@@ -1133,10 +1153,273 @@ class DSSWindow(BoxLayout):
                             if i == df.index[idx]:
                                 _saw['Alternatif'][idx] = j
                                 _saw['Vs'][idx] = V[idx]
+                                _saw['Rank'][idx] = sV.index(V[idx])
                                 break
                             idx+=1
 
             return _saw
+
+    def get_topsiss(self, bulan, tahun):
+            alter = {}
+            crit = {}
+            subcrit = {}
+            
+
+            #main_proc_topsis
+            conn = ConnectDB().Connect()
+            cursor = conn.cursor()
+            find_top = ("SELECT IDKaryawan, Nama FROM karyawan")
+            cursor.execute(find_top)
+            results = cursor.fetchall()
+            for i in results:
+                alter['{0}'.format(i[0])] = i[1]
+
+            find_top = ("SELECT kode_krit, bobot_krit FROM kriteria")
+            cursor.execute(find_top)
+            results = cursor.fetchall()
+            for i in results:
+                crit['{0}'.format(i[0])] = i[1]
+
+            find_top = ("SELECT kode_sub, bobot_sub FROM subkriteria")
+            cursor.execute(find_top)
+            results = cursor.fetchall()
+            for i in results:
+                subcrit['{0}'.format(i[0])] = i[1]
+
+            _top = OrderedDict()
+            _top['Alternatif'] = {}
+            for i in crit.keys():
+                _top['{0}'.format(i)] = {}
+
+            find_top = ("select * from showsaw where MONTh(tanggal) = %s && year(tanggal) = %s")
+            cursor.execute(find_top, [(bulan), (tahun)])
+            resultss = cursor.fetchall()
+            test = {}
+            if resultss:
+                for i in resultss:
+                    for k in crit:
+                        if i[1] not in test: 
+                            test['{0}'.format(i[1])] = {}
+                            if i[1] == k:
+                                for j in alter: 
+                                    if i[0] not in test['{0}'.format(i[1])]:
+                                        test['{0}'.format(i[1])]['{0}'.format(i[0])] = {}
+                                        test['{0}'.format(i[1])]['{0}'.format(i[0])] = []
+                                        if i[0] == j:
+                                            for l in subcrit:
+                                                if i[2] == l:
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])].append(round(i[3]*i[4], 2))
+                                                    
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])] = [sum(test['{0}'.format(i[1])]['{0}'.format(i[0])])]                                 
+                                    else:
+                                        if i[0] == j:
+                                            for l in subcrit: 
+                                                if i[2] == l:
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])].append(round(i[3]*i[4], 2))
+                                                    
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])] = [sum(test['{0}'.format(i[1])]['{0}'.format(i[0])])]                                                 
+                        else:
+                            if i[1] == k:
+                                for j in alter:
+                                    if i[0] not in test['{0}'.format(i[1])]:
+                                        test['{0}'.format(i[1])]['{0}'.format(i[0])] = {}
+                                        test['{0}'.format(i[1])]['{0}'.format(i[0])] = []
+                                        if i[0] == j:
+                                            for l in subcrit:
+                                                if i[2] == l:
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])].append(round(i[3]*i[4], 2))
+                                                    
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])] = [sum(test['{0}'.format(i[1])]['{0}'.format(i[0])])]                                   
+                                    else:
+                                        if i[0] == j:
+                                            for l in subcrit:
+                                                if i[2] == l:
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])].append(round(i[3]*i[4], 2))
+                                                    
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])] = [sum(test['{0}'.format(i[1])]['{0}'.format(i[0])])]                   
+                                                    
+                for i in test.keys():
+                    for j in crit.keys():
+                        if i == j:
+                            for k, l in test[i].items():
+                                for m in alter.keys():
+                                    if k == m:
+                                        v = l[0]
+                                        test[i][k] = v
+
+                df = pd.DataFrame(test)
+                
+                #outputordereddict
+                if df.isnull().values.any():
+                    self.notify.add_widget(Label(text='[color=#FF0000][b]Nilai Masih Ada Yang Kosong![/b][/color]',markup=True))
+                    self.notify.open()
+                    Clock.schedule_once(self.killswitch,2)
+                else:
+                    for i, j in alter.items():
+                        idx = 0
+                        while idx < len(df.index):
+                            if i == df.index[idx]:
+                                _top['Alternatif'][idx]=j
+                                l=0
+                                for k in crit.keys():
+                                    _top['{0}'.format(k)][idx] = df.iloc[idx, l]
+                                    l+=1
+                            idx+=1
+
+            return _top
+
+    def get_hitungtopsiss(self, bulan, tahun):
+            _top = OrderedDict()
+            _top['Alternatif'] = {}
+            _top['Si+'] = {}
+            _top['Si-'] = {}
+            _top['P'] = {}
+            _top['Rank'] = {}
+
+            alter = {}
+            crit = {}
+            subcrit = {}
+            
+
+            #main_proc_saw
+            conn = ConnectDB().Connect()
+            cursor = conn.cursor()
+            find_saw = ("SELECT IDKaryawan, Nama FROM karyawan")
+            cursor.execute(find_saw)
+            results = cursor.fetchall()
+            for i in results:
+                alter['{0}'.format(i[0])] = i[1]
+
+            find_saw = ("SELECT kode_krit, bobot_krit FROM kriteria")
+            cursor.execute(find_saw)
+            results = cursor.fetchall()
+            for i in results:
+                crit['{0}'.format(i[0])] = i[1]
+
+            find_saw = ("SELECT kode_sub, bobot_sub FROM subkriteria")
+            cursor.execute(find_saw)
+            results = cursor.fetchall()
+            for i in results:
+                subcrit['{0}'.format(i[0])] = i[1]
+
+            find_saw = ("select * from showsaw where MONTh(tanggal) = %s && year(tanggal) = %s")
+            cursor.execute(find_saw, [(bulan), (tahun)])
+            resultss = cursor.fetchall()
+            test = {}
+            if resultss:
+                for i in resultss:
+                    for k in crit:
+                        if i[1] not in test: 
+                            test['{0}'.format(i[1])] = {}
+                            if i[1] == k:
+                                for j in alter: 
+                                    if i[0] not in test['{0}'.format(i[1])]:
+                                        test['{0}'.format(i[1])]['{0}'.format(i[0])] = {}
+                                        test['{0}'.format(i[1])]['{0}'.format(i[0])] = []
+                                        if i[0] == j:
+                                            for l in subcrit:
+                                                if i[2] == l:
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])].append(round(i[3]*i[4], 2))
+                                                    
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])] = [sum(test['{0}'.format(i[1])]['{0}'.format(i[0])])]                                 
+                                    else:
+                                        if i[0] == j:
+                                            for l in subcrit: 
+                                                if i[2] == l:
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])].append(round(i[3]*i[4], 2))
+                                                    
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])] = [sum(test['{0}'.format(i[1])]['{0}'.format(i[0])])]                                                 
+                        else:
+                            if i[1] == k:
+                                for j in alter:
+                                    if i[0] not in test['{0}'.format(i[1])]:
+                                        test['{0}'.format(i[1])]['{0}'.format(i[0])] = {}
+                                        test['{0}'.format(i[1])]['{0}'.format(i[0])] = []
+                                        if i[0] == j:
+                                            for l in subcrit:
+                                                if i[2] == l:
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])].append(round(i[3]*i[4], 2))
+                                                    
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])] = [sum(test['{0}'.format(i[1])]['{0}'.format(i[0])])]                                   
+                                    else:
+                                        if i[0] == j:
+                                            for l in subcrit:
+                                                if i[2] == l:
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])].append(round(i[3]*i[4], 2))
+                                                    
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])] = [sum(test['{0}'.format(i[1])]['{0}'.format(i[0])])]                   
+                for i in test.keys():
+                    for j in crit.keys():
+                        if i == j:
+                            for k, l in test[i].items():
+                                for m in alter.keys():
+                                    if k == m:
+                                        v = l[0]
+                                        test[i][k] = v
+
+                df = pd.DataFrame(test)
+                
+                x, y = df.shape
+                
+                #normalisasi
+                for i in range(y):
+                    V = []
+                    for j in range(x):
+                            v = round((df.iloc[j, i]/math.sqrt(sum(pow(df.iloc[:, i], 2)))), 2)
+                            V.append(v)
+                    df.iloc[:, i]=V 
+
+                #hitung   
+                for i in range(x):
+                    v = 0
+                    j = 0
+                    V = []
+                    for k in df.columns:
+                        for l, m in crit.items():
+                            if l == k:
+                                v = df.iloc[i, j]*m
+                                j+=1
+                        V.append(round(v, 2))
+                    df.iloc[i, :]=V    
+                Sbest = []
+                Sworst = []
+                for i in range(x):
+                    v = 0
+                    j = 0
+                    for k in df.columns:
+                        v = v + (pow((df.iloc[i, j]-(max(df.iloc[:, j]))), 2))
+                        j+=1
+                    Sbest.append(round(pow(v, 0.5), 4))
+                    v = 0
+                    j = 0
+                    for k in df.columns:
+                        v = v + (pow((df.iloc[i, j]-(min(df.iloc[:, j]))), 2))
+                        j+=1
+                    Sworst.append(round(pow(v, 0.5), 4))
+                P = []
+                for i in range(x):
+                    v = (Sworst[i]/(Sbest[i]+Sworst[i]))
+                    P.append(round(v, 4))
+                sp = sorted(P, reverse=True)
+                #outputordereddict
+                if df.isnull().values.any():
+                    self.notify.add_widget(Label(text='[color=#FF0000][b]Nilai Masih Ada Yang Kosong![/b][/color]',markup=True))
+                    self.notify.open()
+                    Clock.schedule_once(self.killswitch,2)
+                else:
+                    for i, j in alter.items():
+                        idx = 0
+                        while idx < len(df.index):
+                            if i == df.index[idx]:
+                                _top['Alternatif'][idx] = j
+                                _top['Si+'][idx] = Sbest[idx]
+                                _top['Si-'][idx] = Sworst[idx]
+                                _top['P'][idx] = P[idx]
+                                _top['Rank'][idx] = sp.index(P[idx])
+                                break
+                            idx+=1
+
+            return _top
 
     def change_screen(self, instance):
         if instance.state == 'down':
