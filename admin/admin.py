@@ -685,12 +685,12 @@ class DSSWindow(BoxLayout):
             else:
                 conn = ConnectDB().Connect()
                 cursor = conn.cursor()
-                find_n = ("select * from penilaiankaryawan where IDKaryawan_nilai = %s AND month(Tanggal) = %s && YEAR(Tanggal) = %s AND kode_sub_nilai = %s AND kode_krit_nilai = %s")
-                cursor.execute(find_n, [(id), (bln), (thn), (subkrit), (krit)])
+                find_n = ("select * from penilaiankaryawan where IDKaryawan_nilai = %s AND month(Tanggal) = %s && YEAR(Tanggal) = %s AND kode_sub_nilai = %s")
+                cursor.execute(find_n, [(id), (bln), (thn), (subkrit)])
                 results = cursor.fetchall()
                 if results:
-                    delete_n = ("delete from penilaiankaryawan where IDKaryawan_nilai = %s AND month(Tanggal) = %s && YEAR(Tanggal) = %s AND kode_sub_nilai = %s AND kode_krit_nilai = %s")
-                    cursor.execute(delete_n, [(id), (bln), (thn), (subkrit), (krit)])
+                    delete_n = ("delete from penilaiankaryawan where IDKaryawan_nilai = %s AND month(Tanggal) = %s && YEAR(Tanggal) = %s AND kode_sub_nilai = %s")
+                    cursor.execute(delete_n, [(id), (bln), (thn), (subkrit)])
                     conn.commit()
                     self.notify.add_widget(Label(text='[color=#FF0000][b]Data Nilai Sukses Dihapus![/b][/color]',markup=True))
                     self.notify.open()
@@ -903,7 +903,6 @@ class DSSWindow(BoxLayout):
             _nilai['ID Karyawan'] = {}
             _nilai['Nama'] = {}
             _nilai['Tanggal'] = {}
-            _nilai['Nama Kriteria'] = {}
             _nilai['Nama SubKriteria'] = {}
             _nilai['Nilai'] = {}
 
@@ -911,7 +910,6 @@ class DSSWindow(BoxLayout):
             IDK = []
             Nama = []
             Tanggal = []
-            Nama_Krit = []
             Nama_Sub = []
             Nilai = []
 
@@ -921,9 +919,8 @@ class DSSWindow(BoxLayout):
                 IDK.append(i[0])
                 Nama.append(i[1])
                 Tanggal.append(i[2])
-                Nama_Krit.append(i[3])
-                Nama_Sub.append(i[4])
-                Nilai.append(i[5])
+                Nama_Sub.append(i[3])
+                Nilai.append(i[4])
                 
                 noawal+=1
             # print(designations)
@@ -934,7 +931,6 @@ class DSSWindow(BoxLayout):
                 _nilai['ID Karyawan'][idx] = IDK[idx]
                 _nilai['Nama'][idx] = Nama[idx]
                 _nilai['Tanggal'][idx] = Tanggal[idx]
-                _nilai['Nama Kriteria'][idx] = Nama_Krit[idx]
                 _nilai['Nama SubKriteria'][idx] = Nama_Sub[idx]
                 _nilai['Nilai'][idx] = Nilai[idx]
                 
