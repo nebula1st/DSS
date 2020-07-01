@@ -16,7 +16,7 @@
         Rectangle:
             size: self.size
             pos: self.pos
-    
+               
     BoxLayout:
         id: top_nav
         size_hint_y: None
@@ -27,16 +27,15 @@
             Rectangle:
                 size: self.size
                 pos: self.pos
-        
+
         FlatButton:
             id: file_trigger
             text: 'File'
             on_release: file_dropdown.open(self)
             size_hint: (.1,None)
             height: 30
-
             Widget:
-                on_parent: file_dropdown.dismiss()
+                
                 DropDown:
                     id: file_dropdown
                     Button:
@@ -127,14 +126,22 @@
             id: all_content
             size_hint_x: .8
             padding: (20,10)
+            canvas.before:
+
+                Color:
+                    rgba: (1,1,1,1)
+                Rectangle:
+                    size: (self.width/2, self.height/2)
+                    pos: ((self.x+self.width/2)-(self.width/2)/2, (self.y+self.height/2)-(self.height/2)/2)
+                    source: 'karyawan.png'
+
             ScreenManager:
                 id: scrn_mngr
                 transition: sm.NoTransition()
                 Screen:
                     id: welcome_content
                     name: 'welcome_content'
-                    Image:
-                        source: 'admin/kivy_logo.png'    
+                      
                 Screen:
                     id: karyawan_content
                     name: 'karyawan_content'
