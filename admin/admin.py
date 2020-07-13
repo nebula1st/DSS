@@ -1,5 +1,3 @@
-
-
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.lang import Builder
@@ -33,17 +31,9 @@ class DSSWindow(BoxLayout):
 
         #notif
         self.notify = Notify()
-
         #crud nilai
         self.ids.list_krit_n.values = []
-        conn = ConnectDB().Connect()
-        cursor = conn.cursor()
-        find_k = ("SELECT * FROM Kriteria")
-        cursor.execute(find_k)
-        results = cursor.fetchall()
-        for i in results:
-            self.ids.list_krit_n.values.append(str(i[0]))
-
+        
         #dates & set spinner nilai & saw values
         self.today = dt.today().date()
         
@@ -244,6 +234,14 @@ class DSSWindow(BoxLayout):
                 self.ids.list_subkrit_n.values.append(str(i[0]))   
 
     def add_nilai_fields(self):
+            self.ids.list_krit_n.values = []
+            conn = ConnectDB().Connect()
+            cursor = conn.cursor()
+            find_k = ("SELECT * FROM Kriteria")
+            cursor.execute(find_k)
+            results = cursor.fetchall()
+            for i in results:
+                self.ids.list_krit_n.values.append(str(i[0]))
             target = self.ids.ops_fields_n
             target.clear_widgets()
             crud_id = TextInput(hint_text='ID Karyawan',multiline=False)
@@ -258,28 +256,25 @@ class DSSWindow(BoxLayout):
             target.add_widget(crud_submit)
 
     def update_nilai_fields(self):
-            target = self.ids.ops_fields_n
-            target.clear_widgets()
-            crud_kode_kriteria = Spinner(text='Kode K')
-            crud_kode_kriteria.values = []
+            self.ids.list_krit_n.values = []
             conn = ConnectDB().Connect()
             cursor = conn.cursor()
             find_k = ("SELECT * FROM Kriteria")
             cursor.execute(find_k)
             results = cursor.fetchall()
             for i in results:
-                crud_kode_kriteria.values.append(str(i[0]))
-            crud_kode = TextInput(hint_text='Kode SubKriteria',multiline=False)
-            crud_nama = TextInput(hint_text='Nama',multiline=False)
-            crud_bobot = TextInput(hint_text='Bobot',multiline=False)
-            crud_keterangan = TextInput(hint_text='Keterangan',multiline=False)
-            crud_submit = Button(text='Update',size_hint_x=None,width=100,on_release=lambda x: self.update_sk(crud_kode.text, crud_kode_kriteria.text, crud_nama.text, crud_bobot.text, crud_keterangan.text))
+                self.ids.list_krit_n.values.append(str(i[0]))
+            target = self.ids.ops_fields_n
+            target.clear_widgets()
+            crud_id = TextInput(hint_text='ID Karyawan',multiline=False)
+            crud_tgl = self.today
+            crud_nilai = TextInput(hint_text='Nilai',multiline=False)
+            crud_submit = Button(text='Update',size_hint_x=None,width=100,on_release=lambda x: self.update_nilai(crud_id.text, crud_tgl, self.ids.list_krit_n.text, self.ids.list_subkrit_n.text, crud_nilai.text))
 
-            target.add_widget(crud_kode)
-            target.add_widget(crud_kode_kriteria)
-            target.add_widget(crud_nama)
-            target.add_widget(crud_bobot)
-            target.add_widget(crud_keterangan)
+            target.add_widget(crud_id)
+            target.add_widget(self.ids.list_krit_n)
+            target.add_widget(self.ids.list_subkrit_n)
+            target.add_widget(crud_nilai)
             target.add_widget(crud_submit)
 
     def remove_nilai_fields(self):
@@ -295,6 +290,10 @@ class DSSWindow(BoxLayout):
     def add_user(self, id, nama, divisi, jk, ultah, alamat, telp):
             if id == '' or nama == '' or divisi == 'Divisi' or jk == 'JK' or telp == '':
                 self.notify.add_widget(Label(text='[color=#FF0000][b]All Fields Required[/b][/color]',markup=True))
+                self.notify.open()
+                Clock.schedule_once(self.killswitch,2)
+            elif len(id)>10 or len(nama)>50 or len(telp)<12 or len(telp)>13:
+                self.notify.add_widget(Label(text='[color=#FF0000][b]Panjang Isi Fields Tidak Sesuai[/b][/color]',markup=True))
                 self.notify.open()
                 Clock.schedule_once(self.killswitch,2)
             else:
@@ -325,6 +324,10 @@ class DSSWindow(BoxLayout):
     def update_user(self, id, nama, divisi, jk, ultah, alamat, telp):
             if id == '':
                 self.notify.add_widget(Label(text='[color=#FF0000][b]ID Karyawan Fields Required[/b][/color]',markup=True))
+                self.notify.open()
+                Clock.schedule_once(self.killswitch,2)
+            elif len(nama)>50 or len(telp)<12 or len(telp)>13:
+                self.notify.add_widget(Label(text='[color=#FF0000][b]Panjang Isi Fields Tidak Sesuai[/b][/color]',markup=True))
                 self.notify.open()
                 Clock.schedule_once(self.killswitch,2)
             else:
@@ -399,6 +402,10 @@ class DSSWindow(BoxLayout):
                 self.notify.add_widget(Label(text='[color=#FF0000][b]All Fields Required[/b][/color]',markup=True))
                 self.notify.open()
                 Clock.schedule_once(self.killswitch,2)
+            elif len(kode)>5 or len(nama)>10:
+                self.notify.add_widget(Label(text='[color=#FF0000][b]Panjang Isi Fields Tidak Sesuai[/b][/color]',markup=True))
+                self.notify.open()
+                Clock.schedule_once(self.killswitch,2)
             else:
                 conn = ConnectDB().Connect()
                 cursor = conn.cursor()
@@ -437,6 +444,10 @@ class DSSWindow(BoxLayout):
     def update_kriteria(self, kode, nama, bobot, keterangan):
             if kode == '':
                 self.notify.add_widget(Label(text='[color=#FF0000][b]Kode Kriteria Fields Required[/b][/color]',markup=True))
+                self.notify.open()
+                Clock.schedule_once(self.killswitch,2)
+            elif len(nama)>10:
+                self.notify.add_widget(Label(text='[color=#FF0000][b]Panjang Isi Fields Tidak Sesuai[/b][/color]',markup=True))
                 self.notify.open()
                 Clock.schedule_once(self.killswitch,2)
             else:
@@ -523,6 +534,10 @@ class DSSWindow(BoxLayout):
                 self.notify.add_widget(Label(text='[color=#FF0000][b]All Fields Required[/b][/color]',markup=True))
                 self.notify.open()
                 Clock.schedule_once(self.killswitch,2)
+            elif len(kode)>6 or len(nama)>20:
+                self.notify.add_widget(Label(text='[color=#FF0000][b]Panjang Isi Fields Tidak Sesuai[/b][/color]',markup=True))
+                self.notify.open()
+                Clock.schedule_once(self.killswitch,2)
             else:
                 conn = ConnectDB().Connect()
                 cursor = conn.cursor()
@@ -561,6 +576,10 @@ class DSSWindow(BoxLayout):
     def update_sk(self, kode, kode_kriteria, nama, bobot, keterangan):
             if kode == '':
                 self.notify.add_widget(Label(text='[color=#FF0000][b]Kode SubKriteria Fields Required[/b][/color]',markup=True))
+                self.notify.open()
+                Clock.schedule_once(self.killswitch,2)
+            elif len(nama)>20:
+                self.notify.add_widget(Label(text='[color=#FF0000][b]Panjang Isi Fields Tidak Sesuai[/b][/color]',markup=True))
                 self.notify.open()
                 Clock.schedule_once(self.killswitch,2)
             else:
@@ -647,27 +666,68 @@ class DSSWindow(BoxLayout):
     def add_nilai(self, id, tgl, krit, subkrit, nilai):
             bln = dt.today().date().strftime("%m")
             thn = dt.today().date().strftime("%Y")
+            nilais = float(nilai)
             if id == '' or krit == 'Kode K' or subkrit == 'Kode SK' or nilai == '':
                 self.notify.add_widget(Label(text='[color=#FF0000][b]All Fields Required[/b][/color]',markup=True))
+                self.notify.open()
+                Clock.schedule_once(self.killswitch,2)
+            elif isinstance(nilais, float) == False:
+                self.notify.add_widget(Label(text='[color=#FF0000][b]Panjang Isi Fields Tidak Sesuai[/b][/color]',markup=True))
                 self.notify.open()
                 Clock.schedule_once(self.killswitch,2)
             else:
                 conn = ConnectDB().Connect()
                 cursor = conn.cursor()
-                find_n = ("select * from penilaiankaryawan where IDKaryawan_nilai = %s AND month(Tanggal) = %s && YEAR(Tanggal) = %s AND kode_sub_nilai = %s AND kode_krit_nilai = %s")
-                cursor.execute(find_n, [(id), (bln), (thn), (subkrit), (krit)])
+                find_n = ("select * from penilaiankaryawan where IDKaryawan_nilai = %s AND month(Tanggal) = %s && YEAR(Tanggal) = %s AND kode_sub_nilai = %s")
+                cursor.execute(find_n, [(id), (bln), (thn), (subkrit)])
                 results = cursor.fetchall()
                 if results:
                     self.notify.add_widget(Label(text='[color=#FF0000][b]Nilai Sudah Ada![/b][/color]',markup=True))
                     self.notify.open()
                     Clock.schedule_once(self.killswitch,2)     
                 else:
-                    insert_n = ("INSERT INTO penilaiankaryawan VALUES ( %s, %s, %s, %s, %s)")
-                    cursor.execute(insert_n,[(id), (tgl), (subkrit), (krit), (nilai)])
+                    insert_n = ("INSERT INTO penilaiankaryawan VALUES ( %s, %s, %s, %s)")
+                    cursor.execute(insert_n,[(id), (tgl), (subkrit), (nilai)])
                     conn.commit()
                     self.notify.add_widget(Label(text='[color=#FF0000][b]Data Sukses Dimasukkan![/b][/color]',markup=True))
                     self.notify.open()
                     Clock.schedule_once(self.killswitch,2)
+                content = self.ids.nilai_contents
+                content.clear_widgets()
+
+                users = self.get_nilais(bln, thn)
+                userstable = DataTable(table=users)
+                content.add_widget(userstable)
+
+    def update_nilai(self, id, tgl, krit, subkrit, nilai):
+            bln = dt.today().date().strftime("%m")
+            thn = dt.today().date().strftime("%Y")
+            nilais = float(nilai)
+            if id == '' or nilai == '':
+                self.notify.add_widget(Label(text='[color=#FF0000][b]All Fields Required[/b][/color]',markup=True))
+                self.notify.open()
+                Clock.schedule_once(self.killswitch,2)
+            elif isinstance(nilais, float) == False:
+                self.notify.add_widget(Label(text='[color=#FF0000][b]Isi Fields Tidak Sesuai[/b][/color]',markup=True))
+                self.notify.open()
+                Clock.schedule_once(self.killswitch,2)
+            else:
+                conn = ConnectDB().Connect()
+                cursor = conn.cursor()
+                find_n = ("select * from penilaiankaryawan where IDKaryawan_nilai = %s AND month(Tanggal) = %s && YEAR(Tanggal) = %s AND kode_sub_nilai = %s")
+                cursor.execute(find_n, [(id), (bln), (thn), (subkrit)])
+                results = cursor.fetchall()
+                if results:
+                    update_n = ("UPDATE penilaiankaryawan SET nilai = %s WHERE IDKaryawan_nilai = %s AND month(Tanggal) = %s && YEAR(Tanggal) = %s AND kode_sub_nilai = %s")
+                    cursor.execute(update_n,[(nilai), (id), (bln), (thn), (subkrit)])
+                    conn.commit()
+                    self.notify.add_widget(Label(text='[color=#FF0000][b]Data Sukses Diupdate![/b][/color]',markup=True))
+                    self.notify.open()
+                    Clock.schedule_once(self.killswitch,2)   
+                else:
+                    self.notify.add_widget(Label(text='[color=#FF0000][b]Data Nilai Tidak Ada![/b][/color]',markup=True))
+                    self.notify.open()
+                    Clock.schedule_once(self.killswitch,2)  
                 content = self.ids.nilai_contents
                 content.clear_widgets()
 
@@ -1446,6 +1506,7 @@ class DSSWindow(BoxLayout):
                 self.ids.scrn_mngr.current = 'kriteria_content'
             elif instance.text == 'Manage SubKriteria':
                 self.ids.scrn_mngr.current = 'subkriteria_content'
+                
             elif instance.text == 'Manage Nilai':
                 self.ids.scrn_mngr.current = 'nilai_content'
             elif instance.text == 'Hitung SAW':
