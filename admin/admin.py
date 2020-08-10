@@ -1277,44 +1277,51 @@ class DSSWindow(BoxLayout):
                     for k in crit:
                         if i[1] not in test: 
                             test['{0}'.format(i[1])] = {}
+                           
                             if i[1] == k:
                                 for j in alter: 
                                     if i[0] not in test['{0}'.format(i[1])]:
                                         test['{0}'.format(i[1])]['{0}'.format(i[0])] = {}
                                         test['{0}'.format(i[1])]['{0}'.format(i[0])] = []
+                                       
                                         if i[0] == j:
                                             for l in subcrit:
                                                 if i[2] == l:
                                                     test['{0}'.format(i[1])]['{0}'.format(i[0])].append(round(i[3]*i[4], 2))
                                                     
-                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])] = [sum(test['{0}'.format(i[1])]['{0}'.format(i[0])])]                                 
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])] = [sum(test['{0}'.format(i[1])]['{0}'.format(i[0])])]
+                                                                                    
                                     else:
                                         if i[0] == j:
                                             for l in subcrit: 
                                                 if i[2] == l:
                                                     test['{0}'.format(i[1])]['{0}'.format(i[0])].append(round(i[3]*i[4], 2))
                                                     
-                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])] = [sum(test['{0}'.format(i[1])]['{0}'.format(i[0])])]                                                 
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])] = [sum(test['{0}'.format(i[1])]['{0}'.format(i[0])])]
+                                                                                                     
                         else:
                             if i[1] == k:
                                 for j in alter:
                                     if i[0] not in test['{0}'.format(i[1])]:
                                         test['{0}'.format(i[1])]['{0}'.format(i[0])] = {}
                                         test['{0}'.format(i[1])]['{0}'.format(i[0])] = []
+                                        
                                         if i[0] == j:
                                             for l in subcrit:
                                                 if i[2] == l:
                                                     test['{0}'.format(i[1])]['{0}'.format(i[0])].append(round(i[3]*i[4], 2))
                                                     
-                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])] = [sum(test['{0}'.format(i[1])]['{0}'.format(i[0])])]                                   
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])] = [sum(test['{0}'.format(i[1])]['{0}'.format(i[0])])]
+                                                                                       
                                     else:
                                         if i[0] == j:
                                             for l in subcrit:
                                                 if i[2] == l:
                                                     test['{0}'.format(i[1])]['{0}'.format(i[0])].append(round(i[3]*i[4], 2))
                                                     
-                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])] = [sum(test['{0}'.format(i[1])]['{0}'.format(i[0])])]                   
-                                                    
+                                                    test['{0}'.format(i[1])]['{0}'.format(i[0])] = [sum(test['{0}'.format(i[1])]['{0}'.format(i[0])])]
+                                                                      
+                                                   
                 for i in test.keys():
                     for j in crit.keys():
                         if i == j:
@@ -1441,9 +1448,10 @@ class DSSWindow(BoxLayout):
                 for i in range(y):
                     V = []
                     for j in range(x):
-                            v = round((df.iloc[j, i]/math.sqrt(sum(pow(df.iloc[:, i], 2)))), 2)
+                            v = round((df.iloc[j, i]/math.sqrt(sum(pow(df.iloc[:, i], 2)))), 4)
                             V.append(v)
                     df.iloc[:, i]=V 
+                
 
                 #hitung   
                 for i in range(x):
@@ -1455,8 +1463,9 @@ class DSSWindow(BoxLayout):
                             if l == k:
                                 v = df.iloc[i, j]*m
                                 j+=1
-                        V.append(round(v, 2))
-                    df.iloc[i, :]=V    
+                        V.append(round(v, 4))
+                    df.iloc[i, :]=V
+                 
                 Sbest = []
                 Sworst = []
                 for i in range(x):
@@ -1464,12 +1473,14 @@ class DSSWindow(BoxLayout):
                     j = 0
                     for k in df.columns:
                         v = v + (pow((df.iloc[i, j]-(max(df.iloc[:, j]))), 2))
+                        
                         j+=1
                     Sbest.append(round(pow(v, 0.5), 4))
                     v = 0
                     j = 0
                     for k in df.columns:
                         v = v + (pow((df.iloc[i, j]-(min(df.iloc[:, j]))), 2))
+                        
                         j+=1
                     Sworst.append(round(pow(v, 0.5), 4))
                 P = []
